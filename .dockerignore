@@ -1,0 +1,9 @@
+bin/
+obj/
+.vs/
+.git/
+.gitignore
+*.user
+*.suo
+**/[Dd]ebug/
+**/[Rr]elease/
