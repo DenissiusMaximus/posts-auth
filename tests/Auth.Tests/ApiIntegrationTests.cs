@@ -20,7 +20,7 @@ public sealed class ApiIntegrationTests : IClassFixture<ApiFactory>
     public async Task Register_endpoint_returns_json_login_response()
     {
         using var response = await _client.PostAsJsonAsync(
-            "/auth/register", new { login = "alice", password = "secret1" });
+            "/register", new { login = "alice", password = "secret1" });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<LoginResponse>();
@@ -31,7 +31,7 @@ public sealed class ApiIntegrationTests : IClassFixture<ApiFactory>
     [Fact]
     public async Task Login_exists_endpoint_returns_result_from_mediator()
     {
-        using var response = await _client.GetAsync("/auth/login/exists?login=alice");
+        using var response = await _client.GetAsync("/login/exists?login=alice");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<CheckLoginExistsResponse>();
@@ -41,7 +41,7 @@ public sealed class ApiIntegrationTests : IClassFixture<ApiFactory>
     [Fact]
     public async Task Paged_api_keys_endpoint_is_protected()
     {
-        using var response = await _client.GetAsync("/auth/keys/paged?page=0&pageSize=101");
+        using var response = await _client.GetAsync("/keys/paged?page=0&pageSize=101");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -49,7 +49,7 @@ public sealed class ApiIntegrationTests : IClassFixture<ApiFactory>
     [Fact]
     public async Task Protected_api_key_endpoint_requires_authentication()
     {
-        using var response = await _client.GetAsync("/auth/keys");
+        using var response = await _client.GetAsync("/keys");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
