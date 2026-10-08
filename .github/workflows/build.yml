@@ -27,8 +27,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/posts-auth:latest
-            ghcr.io/${{ github.repository_owner }}/posts-auth:${{ github.sha }}
+            ghcr.io/denissiusmaximus/posts-auth:latest
+            ghcr.io/denissiusmaximus/posts-auth:${{ github.sha }}
           cache-from: type=gha,scope=posts-auth
           cache-to: type=gha,mode=max,scope=posts-auth
 
