@@ -34,5 +34,5 @@ jobs:
 
       - name: Trigger redeploy on VM
         run: |
-          curl -X POST "${{ secrets.WEBHOOK_URL }}" \
+          curl --max-time 15 -sS -X POST "${{ secrets.WEBHOOK_URL }}" \
             -H "X-Webhook-Secret: ${{ secrets.WEBHOOK_SECRET }}"
