@@ -3,10 +3,12 @@ using auth.Api.Common;
 using auth.Application.Abstractions;
 using auth.Application.Behaviors;
 using auth.Infrastructure;
+using auth.Infrastructure.Persistence;
 using auth.Infrastructure.Security;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseSwagger();
@@ -53,4 +62,3 @@ app.MapControllers();
 app.MapGet("/health", () => "Ok");
 
 app.Run();
-
