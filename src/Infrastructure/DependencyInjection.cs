@@ -45,8 +45,18 @@ public static class DependencyInjection
         }.ConnectionString;
     }
 
-    private static string GetRequiredEnvironmentVariable(string name) =>
-        Environment.GetEnvironmentVariable(name)
-        ?? throw new InvalidOperationException(
-            $"Required environment variable '{name}' is not configured.");
+    private static string GetRequiredEnvironmentVariable(string name)
+    {
+        var value = Environment.GetEnvironmentVariable(name);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            var configurationName = name.Replace("_", "__", StringComparison.Ordinal);
+            value = Environment.GetEnvironmentVariable(configurationName);
+        }
+
+        return !string.IsNullOrWhiteSpace(value)
+            ? value
+            : throw new InvalidOperationException(
+                $"Required environment variable '{name}' (or '{name.Replace("_", "__", StringComparison.Ordinal)}') is not configured.");
+    }
 }
