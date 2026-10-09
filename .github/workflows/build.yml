@@ -1,11 +1,47 @@
-name: build
+name: auth
 
 on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "*.slnx"
+      - "**/*.csproj"
+      - "Dockerfile"
+      - ".dockerignore"
+      - ".github/workflows/build.yml"
   push:
     branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "*.slnx"
+      - "**/*.csproj"
+      - "Dockerfile"
+      - ".dockerignore"
+      - ".github/workflows/build.yml"
+
+concurrency:
+  group: auth-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - run: dotnet restore auth.slnx
+      - run: dotnet build auth.slnx --configuration Release --no-restore
+      - run: dotnet test tests/Auth.Tests/Auth.Tests.csproj --configuration Release --no-build --verbosity normal
+
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -26,18 +62,27 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/denissiusmaximus/posts-auth
+          tags: |
+            type=raw,value=latest
+            type=sha
+
       - uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ghcr.io/denissiusmaximus/posts-auth:latest
-            ghcr.io/denissiusmaximus/posts-auth:${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=posts-auth
           cache-to: type=gha,mode=max,scope=posts-auth
+          provenance: mode=max
+          sbom: true
 
       - name: Trigger redeploy on VM
         run: |
-          curl --max-time 15 -sS -X POST "${{ secrets.WEBHOOK_URL }}" \
+          curl --fail-with-body --retry 3 --retry-delay 5 --max-time 15 -sS -X POST "${{ secrets.WEBHOOK_URL }}" \
             -H "X-Webhook-Secret: ${{ secrets.WEBHOOK_SECRET }}"

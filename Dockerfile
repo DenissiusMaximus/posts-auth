@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
@@ -6,8 +7,10 @@ COPY src/Application/*.csproj src/Application/
 COPY src/Infrastructure/*.csproj src/Infrastructure/
 COPY src/Api/*.csproj src/Api/
 
+RUN --mount=type=cache,id=auth-nuget,target=/root/.nuget/packages \
+    dotnet restore src/Api/auth.Api.csproj
+
 COPY . .
-RUN dotnet restore src/Api/auth.Api.csproj
 RUN dotnet publish src/Api/auth.Api.csproj -c Release -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
