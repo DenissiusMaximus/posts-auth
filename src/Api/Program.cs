@@ -19,17 +19,26 @@ builder.Services.AddScoped<CurrentUser>();
 builder.Services.AddScoped<ICurrentUser>(
     serviceProvider => serviceProvider.GetRequiredService<CurrentUser>());
 builder.Services.AddInfrastructure();
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer();
+
 builder.Services.AddAuthorization();
+
 builder.Services.AddOptions<JwtBearerOptions>()
     .Configure<JwtProvider>((options, jwtProvider) =>
     {
         options.MapInboundClaims = false;
-        options.TokenValidationParameters = jwtProvider.CreateAccessTokenValidationParameters();
+        var validationParameters = jwtProvider.CreateAccessTokenValidationParameters();
+        validationParameters.ValidateIssuer = false;
+        validationParameters.ValidateAudience = false;
+        validationParameters.ValidateLifetime = false;
+        options.TokenValidationParameters = validationParameters;
     });
+
 builder.Services.AddControllers();
+
 builder.Services.AddValidatorsFromAssembly(typeof(auth.Application.Handlers.Auth.LoginHandler).Assembly);
 builder.Services.AddMediatR(cfg =>
 {
