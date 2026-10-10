@@ -79,8 +79,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=posts-auth
           cache-to: type=gha,mode=max,scope=posts-auth
-          provenance: mode=max
-          sbom: true
 
       - name: Trigger redeploy on VM
         run: |
