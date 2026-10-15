@@ -50,13 +50,31 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.Logger.LogInformation("Starting Auth Service [Environment: {Environment}]", app.Environment.EnvironmentName);
+
 if (!app.Environment.IsEnvironment("Testing"))
 {
+    app.Logger.LogInformation("Applying database migrations...");
     await using var scope = app.Services.CreateAsyncScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await dbContext.Database.MigrateAsync();
+    app.Logger.LogInformation("Database migrations applied successfully.");
 }
 
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    app.Logger.LogInformation("Auth Service started successfully and is ready to accept requests.");
+});
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+    app.Logger.LogInformation("Auth Service is stopping...");
+});
+app.Lifetime.ApplicationStopped.Register(() =>
+{
+    app.Logger.LogInformation("Auth Service stopped.");
+});
+
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseSwagger();
@@ -70,3 +88,5 @@ app.MapControllers();
 
 
 app.Run();
+
+public partial class Program { }
