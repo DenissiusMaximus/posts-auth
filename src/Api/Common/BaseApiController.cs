@@ -5,6 +5,7 @@ using auth.Domain.Errors;
 
 namespace auth.Api.Common;
 
+[Route("auth")]
 [ApiController]
 public abstract class BaseApiController : ControllerBase
 {
