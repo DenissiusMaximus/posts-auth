@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace auth.Api.Controllers;
 
+[Route("auth")]
 [ApiController]
 public sealed class JwksController(ISender sender) : BaseApiController
 {
