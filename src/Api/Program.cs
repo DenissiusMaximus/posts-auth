@@ -77,8 +77,15 @@ app.Lifetime.ApplicationStopped.Register(() =>
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwagger(c =>
+{
+    c.RouteTemplate = "auth/swagger/{documentName}/swagger.json";
+});
+app.UseSwaggerUI(c =>
+{
+    c.RoutePrefix = "auth/swagger"; 
+    c.SwaggerEndpoint("/auth/swagger/v1/swagger.json", "Auth API v1");
+});
 
 app.UseAuthentication();
 app.UseMiddleware<CurrentUserMiddleware>();
@@ -89,4 +96,3 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program { }
