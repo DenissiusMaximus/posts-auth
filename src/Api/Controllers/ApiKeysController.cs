@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace auth.Api.Controllers;
 
 [ApiController]
-[Route("keys")]
+[Route("auth/keys")]
 [Authorize]
 public sealed class ApiKeysController(ISender sender) : BaseApiController
 {

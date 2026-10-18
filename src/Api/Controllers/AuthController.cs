@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace auth.Api.Controllers;
 
 [ApiController]
-[Route("")]
+[Route("auth")]
 public sealed class AuthController(ISender sender) : BaseApiController
 {
     [HttpPost("register")]
